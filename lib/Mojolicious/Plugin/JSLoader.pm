@@ -11,7 +11,7 @@ use HTML::ParseBrowser;
 use Mojo::ByteStream;
 use version 0.77;
 
-our $VERSION = 0.01;
+our $VERSION = 0.02;
 
 sub register {
     my ($self, $app, $config) = @_;
@@ -183,7 +183,7 @@ Load the javascript when a specific browser is used.
 
 There's the "special" browser default. So you are able to load javascript for e.g. everything but IE6
 
-  # Load the javascript when Internet Explorer is not version 8
+  # Load the javascript when Internet Explorer is not version 6
   <%= js_load('http://domain/js_file.js', {inplace => 1, browser => {"Internet Explorer" => '!6', default => 1 } } );
 
 =back
