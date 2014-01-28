@@ -7,6 +7,10 @@ use warnings;
 
 use parent 'Mojolicious::Plugin';
 
+use HTML::ParseBrowser;
+use Mojo::ByteStream;
+use version 0.77;
+
 our $VERSION = 0.01;
 
 sub register {
@@ -20,6 +24,18 @@ sub register {
 
     $app->helper( js_load => sub {
         my $c = shift;
+
+        return '' unless _match_browser($c, @_);
+
+        if ( $_[1] && $_[1]->{inplace} ) {
+            my ($file,$config) = @_;
+            my $local_base = $config->{no_base} ? '' : $base;
+            my $js = $config->{no_file} ? 
+                qq~<script type="text/javascript">$file</script>~ :
+                qq~<script type="text/javascript" src="$local_base$file"></script>~;
+            return Mojo::ByteStream->new( $js );
+        }
+
         push @{ $c->stash->{__JSLOADERFILES__} }, [ @_ ];
     } );
 
@@ -43,6 +59,49 @@ sub register {
 
         ${$content} =~ s!(</body(?:\s|>)|\z)!$load_js$1!;
     });
+}
+
+sub _match_browser {
+    my ($c,$file,$config) = @_;
+
+    return 1 if !$config;
+    return 1 if ref $config ne 'HASH';
+    return 1 if !$config->{browser};
+    return 1 if ref $config->{browser} ne 'HASH';
+
+    my $ua_string = $c->req->headers->user_agent;
+    my $ua        = HTML::ParseBrowser->new( $ua_string );
+
+    return if !$ua;
+
+    my $name    = $ua->name; 
+    my $browser = $config->{browser};
+
+    if ( !exists $browser->{$name} && !exists $browser->{default} ) {
+        return;
+    }
+    elsif ( !exists $browser->{$name} && exists $browser->{default} ) {
+        return 1;
+    }
+
+    my ($op,$version) = $browser->{$name} =~ m{\A\s*([lg]t|!)?\s*([0-9\.]+)};
+
+    return if !defined $version;
+
+    if ( !$op || ( $op ne 'gt' and $op ne 'lt' and $op ne '!' ) ) {
+        return version->parse( $ua->v ) == version->parse( $version );
+    }
+    elsif ( $op eq 'gt' ) {
+        return version->parse( $version ) <= version->parse( $ua->v );
+    }
+    elsif ( $op eq 'lt' ) {
+        return version->parse( $version ) >= version->parse( $ua->v );
+    }
+    elsif ( $op eq '!' ) {
+        return version->parse( $version ) != version->parse( $ua->v );
+    }
+
+    return;
 }
 
 1;
@@ -80,11 +139,64 @@ this JavaScript file this way:
   # <script type="text/javascript" src="http://domain/js_file.js"></script>
   <% js_load('http://domain/js_file.js', {no_base => 1});
 
+=head3 config for js_load
+
+There are several config options for C<js_load>:
+
+=over 4
+
+=item * no_base
+
+Do not use the base url configured on startup when I<no_base> is set to a true value.
+
+  # <script type="text/javascript" src="http://domain/js_file.js"></script>
+  <% js_load('http://domain/js_file.js', {no_base => 1});
+
+=item * no_file
+
+If set to a true value, you have to pass pure JavaScript
+
+  # <script type="text/javascript">alert('test');</script>
+  <% js_load("alert('test')", {no_file => 1});
+
+=item * inplace
+
+Do not load the javascript at the end of the page, but where C<js_load> is called.
+
+  # <script type="text/javascript" src="http://domain/js_file.js"></script>
+  <%= js_load('http://domain/js_file.js', {no_base => 1, inplace => 1});
+
+=item * browser
+
+Load the javascript when a specific browser is used.
+
+  # Load the javascript when Internet Explorer 8 is used
+  # <script type="text/javascript" src="http://domain/js_file.js"></script>
+  <%= js_load('http://domain/js_file.js', {inplace => 1, browser => { "Internet Explorer" => 8 }});
+
+  # Load the javascript when Internet Explorer lower than 8 or Opera 6 is used
+  # <script type="text/javascript" src="http://domain/js_file.js"></script>
+  <%= js_load('http://domain/js_file.js', {inplace => 1, browser => {"Internet Explorer" => 'lt 8', Opera => 6} });
+
+  # Load the javascript when Internet Explorer is not version 8
+  <%= js_load('http://domain/js_file.js', {inplace => 1, browser => {"Internet Explorer" => '!8' } } );
+
+There's the "special" browser default. So you are able to load javascript for e.g. everything but IE6
+
+  # Load the javascript when Internet Explorer is not version 8
+  <%= js_load('http://domain/js_file.js', {inplace => 1, browser => {"Internet Explorer" => '!6', default => 1 } } );
+
+=back
+
 =head1 HOOKS
 
 When you use this module, a hook for I<after_render> is installed. That hook inserts
 the C<< <script> >> tag at the end of the document or right before the closing
 C<< <body> >> tag.
+
+To avoid that late loading, you can use I<inplace> in the config:
+
+  <%= js_load( 'test.js', {inplace => 1} ) %>
 
 =head1 METHODS
 

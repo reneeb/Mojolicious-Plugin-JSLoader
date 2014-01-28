@@ -24,6 +24,8 @@ sub hello {
 
 any '/no' => sub { shift->render( 'nofile' ) };
 
+any '/ie8' => sub { shift->render( 'ie8' ) };
+
 app->start;
 
 __DATA__
@@ -40,4 +42,7 @@ __DATA__
 
 @@ nofile.html.ep
 % js_load( '$(document).ready( function() { alert("test") } )', {no_file => 1} );
+
+@@ ie8.html.ep
+%= js_load( '$(document).ready( function() { alert("test") } )', {no_file => 1, inplace => 1, browser => { "Internet Explorer" => 8 }} );
 

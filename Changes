@@ -1,6 +1,11 @@
 History for Mojolicious::Plugin::JSLoader
 =========================================
 
+0.02  2014-01-28
+
+      * added support for inplace loading
+      * added support for browser detection
+
 0.01  2013-10-24
 
       * initial release
