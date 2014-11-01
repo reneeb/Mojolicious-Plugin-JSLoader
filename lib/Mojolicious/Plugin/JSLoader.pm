@@ -11,7 +11,7 @@ use HTML::ParseBrowser;
 use Mojo::ByteStream;
 use version 0.77;
 
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 
 sub register {
     my ($self, $app, $config) = @_;
@@ -137,7 +137,7 @@ this JavaScript file this way:
   <% js_load('js_file.js') %>
   
   # <script type="text/javascript" src="http://domain/js_file.js"></script>
-  <% js_load('http://domain/js_file.js', {no_base => 1});
+  <% js_load('http://domain/js_file.js', {no_base => 1}); %>
 
 =head3 config for js_load
 
@@ -150,21 +150,21 @@ There are several config options for C<js_load>:
 Do not use the base url configured on startup when I<no_base> is set to a true value.
 
   # <script type="text/javascript" src="http://domain/js_file.js"></script>
-  <% js_load('http://domain/js_file.js', {no_base => 1});
+  <% js_load('http://domain/js_file.js', {no_base => 1}); %>
 
 =item * no_file
 
 If set to a true value, you have to pass pure JavaScript
 
   # <script type="text/javascript">alert('test');</script>
-  <% js_load("alert('test')", {no_file => 1});
+  <% js_load("alert('test')", {no_file => 1}); %>
 
 =item * inplace
 
 Do not load the javascript at the end of the page, but where C<js_load> is called.
 
   # <script type="text/javascript" src="http://domain/js_file.js"></script>
-  <%= js_load('http://domain/js_file.js', {no_base => 1, inplace => 1});
+  <%= js_load('http://domain/js_file.js', {no_base => 1, inplace => 1}); %>
 
 =item * browser
 
@@ -172,19 +172,19 @@ Load the javascript when a specific browser is used.
 
   # Load the javascript when Internet Explorer 8 is used
   # <script type="text/javascript" src="http://domain/js_file.js"></script>
-  <%= js_load('http://domain/js_file.js', {inplace => 1, browser => { "Internet Explorer" => 8 }});
+  <%= js_load('http://domain/js_file.js', {inplace => 1, browser => { "Internet Explorer" => 8 }}); %>
 
   # Load the javascript when Internet Explorer lower than 8 or Opera 6 is used
   # <script type="text/javascript" src="http://domain/js_file.js"></script>
-  <%= js_load('http://domain/js_file.js', {inplace => 1, browser => {"Internet Explorer" => 'lt 8', Opera => 6} });
+  <%= js_load('http://domain/js_file.js', {inplace => 1, browser => {"Internet Explorer" => 'lt 8', Opera => 6} }); %>
 
   # Load the javascript when Internet Explorer is not version 8
-  <%= js_load('http://domain/js_file.js', {inplace => 1, browser => {"Internet Explorer" => '!8' } } );
+  <%= js_load('http://domain/js_file.js', {inplace => 1, browser => {"Internet Explorer" => '!8' } } ); %>
 
 There's the "special" browser default. So you are able to load javascript for e.g. everything but IE6
 
   # Load the javascript when Internet Explorer is not version 6
-  <%= js_load('http://domain/js_file.js', {inplace => 1, browser => {"Internet Explorer" => '!6', default => 1 } } );
+  <%= js_load('http://domain/js_file.js', {inplace => 1, browser => {"Internet Explorer" => '!6', default => 1 } } ); %>
 
 =back
 
