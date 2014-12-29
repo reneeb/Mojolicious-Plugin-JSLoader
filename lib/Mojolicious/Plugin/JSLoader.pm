@@ -11,7 +11,7 @@ use HTML::ParseBrowser;
 use Mojo::ByteStream;
 use version 0.77;
 
-our $VERSION = 0.03;
+our $VERSION = 0.04;
 
 sub register {
     my ($self, $app, $config) = @_;
@@ -26,6 +26,14 @@ sub register {
         my $c = shift;
 
         return '' unless _match_browser($c, @_);
+
+        if ( $_[1]->{check} ) {
+            my $asset = $c->app->static->file(
+                $_[1]->{no_base} ? $_[0] : "$base$_[0]"
+            );
+
+            return '' if !$asset;
+        }
 
         if ( $_[1] && $_[1]->{inplace} ) {
             my ($file,$config) = @_;
@@ -185,6 +193,38 @@ There's the "special" browser default. So you are able to load javascript for e.
 
   # Load the javascript when Internet Explorer is not version 6
   <%= js_load('http://domain/js_file.js', {inplace => 1, browser => {"Internet Explorer" => '!6', default => 1 } } ); %>
+
+=item * check
+
+If you want to avoid 404 errors that might occur when the filname is built dynamically, you can pass C<check> in the
+config options:
+
+ # <public>/test.js exists, <public>/tester.js doesn't
+ % js_load( 'tester.js' );
+ % js_load( 'test.js' );
+ 
+ # -> you'll get a 404 error for "tester.js"
+
+ # <public>/test.js exists, <public>/tester.js doesn't
+ % js_load( 'tester.js', { check => 1 } );
+ % js_load( 'test.js', { check => 1 } );
+ 
+ # -> no 404 error, the javascript tag for tester.js isn't added to the HTML
+
+When you pass C<check>, it is checked whether Mojolicious can create a L<static file|Mojolicious::Static/file> or not.
+So the "file" doesn't have to be a file on disk, but a "file" in the C<__DATA__> section is ok, too.
+
+Your class
+
+  __DATA__
+  @@ checktest.js
+  $(document).ready( function(){ alert('check') } );
+
+Your template:
+
+  % js_load( 'checktest.js' ); # works
+  % js_load( 'checktest.js', { check => 1 } ); # works
+  % js_load( 'checktest2.js', { check => 1 } ); # tag is not added as checktest2.js doesn't exist
 
 =back
 
