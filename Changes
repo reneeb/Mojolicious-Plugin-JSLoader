@@ -1,6 +1,8 @@
 History for Mojolicious::Plugin::JSLoader
 =========================================
 
+0.04 2014-12-29
+
   [IMPROVEMENTS]
   * added support for filechecks
 

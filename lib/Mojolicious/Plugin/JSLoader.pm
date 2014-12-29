@@ -11,7 +11,7 @@ use HTML::ParseBrowser;
 use Mojo::ByteStream;
 use version 0.77;
 
-our $VERSION = 0.03;
+our $VERSION = 0.04;
 
 sub register {
     my ($self, $app, $config) = @_;
