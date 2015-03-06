@@ -11,7 +11,7 @@ use HTML::ParseBrowser;
 use Mojo::ByteStream;
 use version 0.77;
 
-our $VERSION = 0.04;
+our $VERSION = 0.05;
 
 sub register {
     my ($self, $app, $config) = @_;
@@ -38,6 +38,9 @@ sub register {
         if ( $_[1] && $_[1]->{inplace} ) {
             my ($file,$config) = @_;
             my $local_base = $config->{no_base} ? '' : $base;
+
+            $local_base = $c->url_for( $local_base ) if $local_base;
+
             my $js = $config->{no_file} ? 
                 qq~<script type="text/javascript">$file</script>~ :
                 qq~<script type="text/javascript" src="$local_base$file"></script>~;
@@ -57,6 +60,9 @@ sub register {
                       map{
                           my ($file,$config) = @{ $_ };
                           my $local_base = $config->{no_base} ? '' : $base;
+
+                          $local_base = $c->url_for( $local_base ) if $local_base;
+
                           $config->{no_file} ? 
                               qq~<script type="text/javascript">$file</script>~ :
                               qq~<script type="text/javascript" src="$local_base$file"></script>~;

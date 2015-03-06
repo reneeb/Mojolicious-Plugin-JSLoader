@@ -1,6 +1,11 @@
 History for Mojolicious::Plugin::JSLoader
 =========================================
 
+0.05 2015-03-06
+
+  [IMPROVEMENTS]
+  * use url_for when building the URL
+
 0.04 2014-12-29
 
   [IMPROVEMENTS]
