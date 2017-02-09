@@ -1,6 +1,13 @@
 History for Mojolicious::Plugin::JSLoader
 =========================================
 
+0.06 2017-02-09
+
+  [IMPROVEMENTS]
+  * add support for 'on_ready' to make it easier to run
+    JavaScript when the document is loaded
+    (requires JQuery)
+
 0.05 2015-03-06
 
   [IMPROVEMENTS]
