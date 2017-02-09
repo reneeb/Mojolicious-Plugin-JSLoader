@@ -23,6 +23,11 @@ any '/hello' => sub {
 JS
     $self->render( 'default' );
 };
+any '/ready' => sub {
+    my $c = shift;
+    $c->js_load( 'alert("test");', { no_file => 1, on_ready => 1 } );
+    $c->render( 'default' );
+};
 
 ## Webapp END
 
@@ -37,6 +42,12 @@ my $hello_check = q!<script type="text/javascript">    $(document).ready(functio
 
 $t->get_ok( '/' )->status_is( 200 )->content_is( $base_check );
 $t->get_ok( '/hello' )->status_is( 200 )->content_is( $hello_check );
+
+my $ready_check  = q~<script type="text/javascript">$(document).ready( function(){alert("test");});</script>
+<script type="text/javascript">alert('default');</script>
+<script type="text/javascript" src="js_file.js"></script>~;
+
+$t->get_ok( '/ready' )->status_is( 200 )->content_is( $ready_check );
 
 done_testing();
 
