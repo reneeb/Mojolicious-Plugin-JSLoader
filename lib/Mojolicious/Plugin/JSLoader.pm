@@ -11,7 +11,7 @@ use HTML::ParseBrowser;
 use Mojo::ByteStream;
 use version 0.77;
 
-our $VERSION = 0.05;
+our $VERSION = 0.06;
 
 sub register {
     my ($self, $app, $config) = @_;
@@ -62,6 +62,10 @@ sub register {
                           my $local_base = $config->{no_base} ? '' : $base;
 
                           $local_base = $c->url_for( $local_base ) if $local_base;
+
+                          if ( $config->{no_file} and $config->{on_ready} ) {
+                              $file = sprintf '$(document).ready( function(){%s});', $file;
+                          }
 
                           $config->{no_file} ? 
                               qq~<script type="text/javascript">$file</script>~ :
@@ -169,6 +173,15 @@ Do not use the base url configured on startup when I<no_base> is set to a true v
 =item * no_file
 
 If set to a true value, you have to pass pure JavaScript
+
+  # <script type="text/javascript">alert('test');</script>
+  <% js_load("alert('test')", {no_file => 1}); %>
+
+=item * on_ready
+
+If set to a true value - in combination with a true value for I<no_file> - the javascript
+code is wrapped in C<$(document).ready( function(){...});>. This is quite handy when you
+have jquery installed and you want to run some javascript when the document is loaded.
 
   # <script type="text/javascript">alert('test');</script>
   <% js_load("alert('test')", {no_file => 1}); %>
