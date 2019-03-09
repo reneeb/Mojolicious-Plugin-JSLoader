@@ -41,6 +41,8 @@ sub register {
 
             $local_base = $c->url_for( $local_base ) if $local_base;
 
+            $config->{no_file} = 1 if $config->{js};
+
             my $js = $config->{no_file} ? 
                 qq~<script type="text/javascript">$file</script>~ :
                 qq~<script type="text/javascript" src="$local_base$file"></script>~;
@@ -60,6 +62,8 @@ sub register {
                       map{
                           my ($file,$config) = @{ $_ };
                           my $local_base = $config->{no_base} ? '' : $base;
+
+                          $config->{no_file} = 1 if $config->{js};
 
                           $local_base = $c->url_for( $local_base ) if $local_base;
 
