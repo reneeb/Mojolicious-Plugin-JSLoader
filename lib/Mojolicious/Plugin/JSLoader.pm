@@ -27,6 +27,33 @@ sub register {
 
         return '' unless _match_browser($c, @_);
 
+        die "Can't combine 'once' with 'js' or 'no_file'\n"
+            if $_[1]->{once} and ($_[1]->{js} or $_[1]->{no_file});
+
+
+        ++$self->{_seen}->{ $_[0] }->{count};
+        if ($_[1]->{once}) {
+            die "Different handling of 'once' for $_[0].\n"
+                if $self->{_seen}->{ $_[0] }->{once}
+                and $self->{_seen}->{ $_[0] }->{once} ne $_[1]->{once};
+            $self->{_seen}->{ $_[0] }->{once} = $_[1]->{once};
+        }
+        if ($self->{_seen}->{ $_[0] }->{once}
+            and $self->{_seen}->{ $_[0] }->{count} > 1
+        ) {
+            my $once = $self->{_seen}->{ $_[0] }->{once};
+            if ( $once eq 'warn' ) {
+                warn "$_[0] used more than once.\n";
+
+            } elsif ( $once eq 'die' ) {
+
+                die "$_[0] used more than once.\n";
+
+            } elsif ( ref $once eq ref sub {} ) {
+                $once->( $_[0] );
+            }
+        }
+
         if ( $_[1]->{check} ) {
             my $asset = $c->app->static->file(
                 $_[1]->{no_base} ? $_[0] : "$base$_[0]"
